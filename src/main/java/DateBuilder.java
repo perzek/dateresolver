@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * Created by perzek on 2014-05-23.
  */
-//TODO fix years divisible by 100...
 public class DateBuilder {
 
     private static final String UNITIES[] = new String[]{"", "pierwszego", "drugiego", "trzeciego", "czwartego", "piątego", "szóstego", "siódmego", "ósmego", "dziewiątego", "dziesiątego", "jedenastego", "dwunastego", "trzynastego", "czternastego", "piętnastego", "szenastego", "siedemnastego", "osiemnastego", "dziewiętnastego"};
@@ -32,10 +31,10 @@ public class DateBuilder {
         StringBuilder sb = new StringBuilder();
 
         if (asInt(chars[0]) >= 2) {
-            //wartosci od 20 do 31
+            // 20 to 31
             sb.append(getValue(TENS, asInt(chars[0]))).append(" ").append(getValue(UNITIES, asInt(chars[1]))).append(" ");
         } else if (asInt(chars[0]) < 2) {
-            //wartosci do 19
+            //below 19
             sb.append(getValue(UNITIES, asInt(chars[0]) * 10 + asInt(chars[1]))).append(" ");
         } else {
             throw new IllegalArgumentException("Day should have at least one characters");
@@ -51,7 +50,6 @@ public class DateBuilder {
         return sb.toString();
     }
 
-    //1 8 0 0
     public String resolveYear(String year) {
         char[] chars = addZeroIfTooShort(year.toCharArray(), 4);
         List<String> result = Lists.newArrayList();
