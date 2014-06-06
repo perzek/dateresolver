@@ -1,3 +1,4 @@
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Chars;
 
@@ -10,17 +11,19 @@ import java.util.List;
 //TODO fix years divisible by 100...
 public class DateBuilder {
 
-    private static final String unities[] = new String[]{"", "pierwszego", "drugiego", "trzeciego", "czwartego", "piątego", "szóstego", "siódmego", "ósmego", "dziewiątego", "dziesiątego", "jedenastego", "dwunastego", "trzynastego", "czternastego", "piętnastego", "szenastego", "siedemnastego", "osiemnastego", "dziewiętnastego"};
-    private static final String tens[] = new String[]{"", "", "dwudziestego", "trzydziestego", "czterdziestego", "pięćdziesiątego", "sześćdziesiątego", "siedemdziesątego", "osiemdziesiątego", "dziwięćdziesiątego"};
-    private static final String hundred[] = new String[]{"", "sto", "dwieście", "trzysta", "czterysta", "pięćset", "sześćset", "siedemset", "osiemset", "dziewięćset"};
-    private static final String thousands[] = new String[]{"", "tysiąc", "dwa tysiące", "trzy tysiące", "cztery tysiące", "pięć tysięcy", "sześć tysięcy", "siedem tysięcy", "osiem tysięcy", "dziewięć tysięcy"};
+    private static final String UNITIES[] = new String[]{"", "pierwszego", "drugiego", "trzeciego", "czwartego", "piątego", "szóstego", "siódmego", "ósmego", "dziewiątego", "dziesiątego", "jedenastego", "dwunastego", "trzynastego", "czternastego", "piętnastego", "szenastego", "siedemnastego", "osiemnastego", "dziewiętnastego"};
+    private static final String TENS[] = new String[]{"", "", "dwudziestego", "trzydziestego", "czterdziestego", "pięćdziesiątego", "sześćdziesiątego", "siedemdziesątego", "osiemdziesiątego", "dziwięćdziesiątego"};
+    private static final String HUNDREDS[] = new String[]{"", "sto", "dwieście", "trzysta", "czterysta", "pięćset", "sześćset", "siedemset", "osiemset", "dziewięćset"};
+    private static final String HUNDRED_ALTERNATIVE[] = new String[]{"", "setnego", "dwusetnego", "trzysetnego", "czterysetnego", "pięćsetnego", "sześćsetnego", "siedemsetnego", "osiemsetnego", "dziewięćsetnego"};
+    private static final String THOUSANDS[] = new String[]{"", "tysiąc", "dwa tysiące", "trzy tysiące", "cztery tysiące", "pięć tysięcy", "sześć tysięcy", "siedem tysięcy", "osiem tysięcy", "dziewięć tysięcy"};
+    private static final String THOUSANDS_ALTERNATIVE[] = new String[]{"", "tysięcznego", "dwu tysięcznego", "trzy tysięcznego", "cztero tysięcznego", "pięcio tysięcznego", "sześcio tysięcznego", "siedmio tysięcznego", "ośmio tysięcznego", "dziewięcio tysięcznego"};
 
-    private static final String months[] = new String[]{"", "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "paźdzniernika", "listopada", "grudnia"};
+    private static final String MONTHS[] = new String[]{"", "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "paźdzniernika", "listopada", "grudnia"};
     public static final char ZERO_VALUE = '0';
 
     public String resolveDate(LocalDate date) {
         return resolveDay(String.valueOf(date.getDayOfMonth())) + resolveMonth(String.valueOf(date.getMonthValue())) +
-                resolveYear(String.valueOf(date.getYear())) + "roku";
+                resolveYear(String.valueOf(date.getYear())) + " roku";
     }
 
     public String resolveDay(String day) {
@@ -30,10 +33,10 @@ public class DateBuilder {
 
         if (asInt(chars[0]) >= 2) {
             //wartosci od 20 do 31
-            sb.append(getValue(tens, asInt(chars[0]))).append(" ").append(getValue(unities, asInt(chars[1]))).append(" ");
+            sb.append(getValue(TENS, asInt(chars[0]))).append(" ").append(getValue(UNITIES, asInt(chars[1]))).append(" ");
         } else if (asInt(chars[0]) < 2) {
             //wartosci do 19
-            sb.append(getValue(unities, asInt(chars[0]) * 10 + asInt(chars[1]))).append(" ");
+            sb.append(getValue(UNITIES, asInt(chars[0]) * 10 + asInt(chars[1]))).append(" ");
         } else {
             throw new IllegalArgumentException("Day should have at least one characters");
         }
@@ -44,25 +47,37 @@ public class DateBuilder {
     public String resolveMonth(String month) {
         char[] chars = addZeroIfTooShort(month.toCharArray(), 2);
         StringBuilder sb = new StringBuilder();
-        sb.append(getValue(months, asInt(chars[0]) * 10 + asInt(chars[1]))).append(" ");
+        sb.append(getValue(MONTHS, asInt(chars[0]) * 10 + asInt(chars[1]))).append(" ");
         return sb.toString();
     }
 
+    //1 8 0 0
     public String resolveYear(String year) {
         char[] chars = addZeroIfTooShort(year.toCharArray(), 4);
-        StringBuilder sb = new StringBuilder();
-        sb.append(getValue(thousands, asInt(chars[0]))).append(" ");
+        List<String> result = Lists.newArrayList();
+        result.add(getValue(THOUSANDS, asInt(chars[0])));
+        Joiner joiner = Joiner.on(" ");
+        if (asInt(chars[3]) == 0) {
+            if (asInt(chars[2]) == 0) {
+                result.add(HUNDRED_ALTERNATIVE[asInt(chars[1])]);
+                if (asInt(chars[1]) == 0) {
+                    result.clear();
+                    result.add(THOUSANDS_ALTERNATIVE[asInt(chars[0])]);
+                }
+                return joiner.join(result);
+            }
+        }
         if (asInt(chars[1]) > 0) {
-            sb.append(getValue(hundred, asInt(chars[1]))).append(" ");
+            result.add(getValue(HUNDREDS, asInt(chars[1])));
         }
         if (asInt(chars[2]) < 2) {
-            sb.append(getValue(unities, asInt(chars[2]) * 10 + asInt(chars[3]))).append(" ");
+            result.add(getValue(UNITIES, asInt(chars[2]) * 10 + asInt(chars[3])));
         } else {
-            sb.append(getValue(tens, asInt(chars[2]))).append(" ");
-            sb.append(getValue(unities, asInt(chars[3]))).append(" ");
+            result.add(getValue(TENS, asInt(chars[2])));
+            result.add(getValue(UNITIES, asInt(chars[3])));
         }
 
-        return sb.toString();
+        return joiner.join(result);
     }
 
     private char[] addZeroIfTooShort(char[] chars, int desiredLenght) {

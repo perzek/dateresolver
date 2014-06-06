@@ -3,43 +3,47 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 public class DateBuilderTest {
 
     @Test
-    public void testResolveDay() throws Exception {
-
+    public void checkResolveDay() throws Exception {
         DateBuilder db = new DateBuilder();
         for (int i = 0; i <= 99; i++) {
-            System.out.println(db.resolveDay(String.valueOf(i)));
-
+            System.out.printf("%d: %s\n", i, db.resolveDay(String.valueOf(i)));
         }
-
     }
 
     @Test
-    public void testResolveMonth() throws Exception {
-
+    public void checkResolveMonth() throws Exception {
         DateBuilder db = new DateBuilder();
         for (int i = 0; i <= 12; i++) {
-            System.out.println(db.resolveMonth(String.valueOf(i)));
-
+            System.out.printf("%d: %s\n", i, db.resolveMonth(String.valueOf(i)));
         }
     }
 
     @Test
-    public void testResolveYear() throws Exception {
+    public void checkResolveYear() throws Exception {
 
         DateBuilder db = new DateBuilder();
-        for (int i = 1800; i <= 2010; i += 10) {
-            System.out.println(db.resolveYear(String.valueOf(i)));
+        for (int i = 1990; i <= 2010; i += 1) {
+            System.out.printf("%d: %s\n", i, db.resolveYear(String.valueOf(i)));
         }
     }
 
     @Test
     public void testResolveDate() {
         DateBuilder db = new DateBuilder();
-        LocalDate date = LocalDate.parse("2001-12-29", DateTimeFormatter.ISO_DATE);
-        System.out.println(db.resolveDate(date));
+        assertThat(db.resolveDate(date("2001-12-29")), is("dwudziestego dziewiątego grudnia dwa tysiące pierwszego roku"));
+        assertThat(db.resolveDate(date("2000-12-29")), is("dwudziestego dziewiątego grudnia dwu tysięcznego roku"));
+        assertThat(db.resolveDate(date("1900-12-29")), is("dwudziestego dziewiątego grudnia tysiąc dziewięćsetnego roku"));
+        assertThat(db.resolveDate(date("2100-12-29")), is("dwudziestego dziewiątego grudnia dwa tysiące setnego roku"));
+    }
+
+    private static LocalDate date(String date) {
+        return LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
     }
 
 
