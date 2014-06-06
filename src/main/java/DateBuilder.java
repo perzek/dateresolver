@@ -36,8 +36,6 @@ public class DateBuilder {
         } else if (asInt(chars[0]) < 2) {
             //below 19
             sb.append(getValue(UNITIES, asInt(chars[0]) * 10 + asInt(chars[1]))).append(" ");
-        } else {
-            throw new IllegalArgumentException("Day should have at least one characters");
         }
 
         return sb.toString();
@@ -55,15 +53,15 @@ public class DateBuilder {
         List<String> result = Lists.newArrayList();
         result.add(getValue(THOUSANDS, asInt(chars[0])));
         Joiner joiner = Joiner.on(" ");
-        if (asInt(chars[3]) == 0) {
-            if (asInt(chars[2]) == 0) {
-                result.add(HUNDRED_ALTERNATIVE[asInt(chars[1])]);
-                if (asInt(chars[1]) == 0) {
-                    result.clear();
-                    result.add(THOUSANDS_ALTERNATIVE[asInt(chars[0])]);
-                }
-                return joiner.join(result);
+        //dated like 1800, 1900 etc
+        if (asInt(chars[3]) == 0 && asInt(chars[2]) == 0) {
+            result.add(HUNDRED_ALTERNATIVE[asInt(chars[1])]);
+            //date 1000, 2000 etc
+            if (asInt(chars[1]) == 0) {
+                result.clear();
+                result.add(THOUSANDS_ALTERNATIVE[asInt(chars[0])]);
             }
+            return joiner.join(result);
         }
         if (asInt(chars[1]) > 0) {
             result.add(getValue(HUNDREDS, asInt(chars[1])));
@@ -78,9 +76,9 @@ public class DateBuilder {
         return joiner.join(result);
     }
 
-    private char[] addZeroIfTooShort(char[] chars, int desiredLenght) {
+    private char[] addZeroIfTooShort(char[] chars, int desiredLength) {
         List<Character> characters = Lists.newArrayList(Chars.asList(chars));
-        while (characters.size() < desiredLenght) {
+        while (characters.size() < desiredLength) {
             characters.add(0, '0');
         }
         return Chars.toArray(characters);
